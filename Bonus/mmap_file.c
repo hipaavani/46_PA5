@@ -193,6 +193,20 @@ resident[slot] = chunk_addr;
 
         if (next_chunk < table_end) {
 
+                        int already_resident = 0;
+
+            for (int i = 0; i < resident_count; i++) {
+                int slot = (fifo_head + i) % RESIDENT_CHUNKS;
+
+                if (resident[slot] == next_chunk) {
+                    already_resident = 1;
+                    break;
+                }
+            }
+
+            if (already_resident)
+                return;
+
             int next_slot;
 
             if (resident_count == RESIDENT_CHUNKS) {
