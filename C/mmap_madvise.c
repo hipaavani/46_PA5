@@ -114,11 +114,19 @@ int nr = chunk_bytes / sizeof(double);
 calculate_sqrts((double *)mapped, start, nr);
 
 #ifdef USE_SEQUENTIAL
-madvise(mapped, chunk_bytes, MADV_SEQUENTIAL);
+if (madvise(mapped, chunk_bytes, MADV_SEQUENTIAL) == -1) {
+    const char msg[] = "MADV_SEQUENTIAL failed\n";
+    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    _exit(EXIT_FAILURE);
+}
 #endif
 
 #ifdef USE_RANDOM
-madvise(mapped, chunk_bytes, MADV_RANDOM);
+if (madvise(mapped, chunk_bytes, MADV_RANDOM) == -1) {
+    const char msg[] = "MADV_RANDOM failed\n";
+    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    _exit(EXIT_FAILURE);
+}
 #endif
 }
 
