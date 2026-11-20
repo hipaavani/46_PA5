@@ -109,6 +109,14 @@ create_backing_file(void)
 }
 
 static void
+report_error(const char *msg)
+{
+    size_t len = strlen(msg);
+    ssize_t result = write(STDERR_FILENO, msg, len);
+    (void)result;
+}
+
+static void
 handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 {
     (void)sig;
@@ -122,7 +130,7 @@ handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 
     if (fault_addr < table_start || fault_addr >= table_end) {
         const char msg[] = "Invalid SIGSEGV\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        report_error(msg);
         _exit(EXIT_FAILURE);
     }
 
@@ -139,7 +147,7 @@ handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 
         if (munmap((void *)resident[fifo_head], chunk_bytes) == -1) {
             const char msg[] = "munmap failed\n";
-            write(STDERR_FILENO, msg, sizeof(msg) - 1);
+            report_error(msg);
             _exit(EXIT_FAILURE);
         }
 
@@ -161,7 +169,7 @@ handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 
 if (mapped == MAP_FAILED) {
     const char msg[] = "mmap failed\n";
-    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    report_error(msg);
     _exit(EXIT_FAILURE);
 }
 
@@ -169,7 +177,7 @@ if (mapped == MAP_FAILED) {
 
     if (madvise(mapped, chunk_bytes, MADV_SEQUENTIAL) == -1) {
         const char msg[] = "MADV_SEQUENTIAL failed\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        report_error(msg);
         _exit(EXIT_FAILURE);
     }
 
@@ -177,7 +185,7 @@ if (mapped == MAP_FAILED) {
 
     if (madvise(mapped, chunk_bytes, MADV_RANDOM) == -1) {
         const char msg[] = "MADV_RANDOM failed\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        report_error(msg);
         _exit(EXIT_FAILURE);
     }
 
@@ -214,7 +222,7 @@ resident[slot] = chunk_addr;
                 if (munmap((void *)resident[fifo_head],
                            chunk_bytes) == -1) {
                     const char msg[] = "prefetch munmap failed\n";
-                    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+                    report_error(msg);
                     _exit(EXIT_FAILURE);
                 }
 
@@ -241,14 +249,14 @@ resident[slot] = chunk_addr;
 
             if (next_mapped == MAP_FAILED) {
                 const char msg[] = "prefetch mmap failed\n";
-                write(STDERR_FILENO, msg, sizeof(msg) - 1);
+                report_error(msg);
                 _exit(EXIT_FAILURE);
             }
 
             if (madvise(next_mapped, chunk_bytes,
                         MADV_WILLNEED) == -1) {
                 const char msg[] = "MADV_WILLNEED failed\n";
-                write(STDERR_FILENO, msg, sizeof(msg) - 1);
+                report_error(msg);
                 _exit(EXIT_FAILURE);
             }
 
