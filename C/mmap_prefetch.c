@@ -66,7 +66,7 @@ map_chunk(uintptr_t chunk_addr)
 
         if (munmap((void *)resident[fifo_head], chunk_bytes) == -1) {
             const char msg[] = "munmap failed\n";
-            write(STDERR_FILENO, msg, sizeof(msg) - 1);
+            if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
             _exit(EXIT_FAILURE);
         }
 
@@ -89,7 +89,7 @@ map_chunk(uintptr_t chunk_addr)
 
     if (mapped == MAP_FAILED) {
         const char msg[] = "mmap failed\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
         _exit(EXIT_FAILURE);
     }
 
@@ -119,7 +119,7 @@ handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 
     if (fault_addr < table_start || fault_addr >= table_end) {
         const char msg[] = "Invalid SIGSEGV\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
         _exit(EXIT_FAILURE);
     }
 
@@ -142,7 +142,7 @@ if (next_chunk < table_end) {
     if (madvise((void *)next_chunk,
                 chunk_bytes, MADV_WILLNEED) == -1) {
         const char msg[] = "madvise WILLNEED failed\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
         _exit(EXIT_FAILURE);
     }
 }
