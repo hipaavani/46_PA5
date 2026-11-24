@@ -58,7 +58,7 @@ handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 
     if (fault_addr < table_start || fault_addr >= table_end) {
         const char msg[] = "Invalid SIGSEGV\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
         _exit(EXIT_FAILURE);
     }
 
@@ -75,12 +75,12 @@ handle_sigsegv(int sig, siginfo_t *si, void *ctx)
 if (madvise((void *)resident[fifo_head],
             chunk_bytes, MADV_DONTNEED) == -1) {
     const char msg[] = "madvise failed\n";
-    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
     _exit(EXIT_FAILURE);
 }
         if (munmap((void *)resident[fifo_head], chunk_bytes) == -1) {
             const char msg[] = "munmap failed\n";
-            write(STDERR_FILENO, msg, sizeof(msg) - 1);
+            if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
             _exit(EXIT_FAILURE);
         }
 
@@ -103,7 +103,7 @@ if (madvise((void *)resident[fifo_head],
 
     if (mapped == MAP_FAILED) {
         const char msg[] = "mmap failed\n";
-        write(STDERR_FILENO, msg, sizeof(msg) - 1);
+        if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
         _exit(EXIT_FAILURE);
     }
 resident[slot] = chunk_addr;
@@ -116,7 +116,7 @@ calculate_sqrts((double *)mapped, start, nr);
 #ifdef USE_SEQUENTIAL
 if (madvise(mapped, chunk_bytes, MADV_SEQUENTIAL) == -1) {
     const char msg[] = "MADV_SEQUENTIAL failed\n";
-    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
     _exit(EXIT_FAILURE);
 }
 #endif
@@ -124,7 +124,7 @@ if (madvise(mapped, chunk_bytes, MADV_SEQUENTIAL) == -1) {
 #ifdef USE_RANDOM
 if (madvise(mapped, chunk_bytes, MADV_RANDOM) == -1) {
     const char msg[] = "MADV_RANDOM failed\n";
-    write(STDERR_FILENO, msg, sizeof(msg) - 1);
+    if (write(STDERR_FILENO, msg, sizeof(msg) - 1) == -1) {     _exit(EXIT_FAILURE); }
     _exit(EXIT_FAILURE);
 }
 #endif
